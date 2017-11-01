@@ -1,5 +1,5 @@
 # IP2Location Filter Plugin
-This is IP2Location Filter plugin for Logstash that enables the user to find the country, region or state, city, latitude and longitude, US ZIP code, time zone, Internet Service Provider (ISP) or company name, domain name, net speed, area code, weather station code, weather station name, mobile country code (MCC), mobile network code (MNC) and carrier brand, elevation, and usage type by IP address or hostname originates from.  The library reads the geo location information from **IP2Location BIN data** file.
+This is IP2Location filter plugin for Logstash that enables Logstash's users to add geolocation information such as country, region, city, latitude, longitude, ZIP code, time zone, Internet Service Provider (ISP), domain name, connection speed, IDD code, area code, weather station code, weather station name, mobile country code (MCC), mobile network code (MNC), mobile brand, elevation, and usage type by IP address. The library reads the geo location information from **IP2Location BIN data** file.
 
 Supported IPv4 and IPv6 address.
 
@@ -8,6 +8,13 @@ Supported IPv4 and IPv6 address.
 This plugin requires IP2Location BIN data file to function. You may download the BIN data file at
 * IP2Location LITE BIN Data (Free): https://lite.ip2location.com
 * IP2Location Commercial BIN Data (Comprehensive): https://www.ip2location.com/software/java-component
+
+
+## Installation
+Install this plugin by the following code:
+```
+bin/logstash-plugin install logstash-filter-ip2location
+```
 
 
 ## IP2Location Filter Configuration
