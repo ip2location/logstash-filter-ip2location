@@ -4,6 +4,10 @@ This is IP2Location filter plugin for Logstash that enables Logstash's users to 
 Supported IPv4 and IPv6 address.
 
 
+## Example
+![Example of data](https://www.ip2location.com/images/tutorial/logstash-filter-ip2location-screenshot2.png)
+
+
 ## Dependencies (IP2LOCATION BIN DATA FILE)
 This plugin requires IP2Location BIN data file to function. You may download the BIN data file at
 * IP2Location LITE BIN Data (Free): https://lite.ip2location.com
