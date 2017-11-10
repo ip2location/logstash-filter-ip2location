@@ -18,10 +18,6 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
   # The field used to define iplocation as target.
   config :target, :validate => :string, :default => 'ip2location'
 
-  # The field containing the license key.
-  # If this field is provided, The random 5-second delay will be removed.
-  config :license, :validate => :string, :default => ''
-
   public
   def register
     if @database.nil?
@@ -34,7 +30,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
 
     @logger.info("Using ip2location database", :path => @database)
     
-    @ip2locationfilter = org.logstash.filters.IP2LocationFilter.new(@source, @target, @database, @license)
+    @ip2locationfilter = org.logstash.filters.IP2LocationFilter.new(@source, @target, @database)
   end
 
   public
