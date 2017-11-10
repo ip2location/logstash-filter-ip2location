@@ -6,34 +6,6 @@ Supported IPv4 and IPv6 address.
 For the methods to use IP2Location filter plugin with ELK (Elasticsearch, Logstash, and Kibana), please take a look on this [tutorial](https://www.ip2location.com/tutorials/how-to-use-ip2location-filter-plugin-with-elk).
 
 
-## Sample Output
-![Example of data](https://www.ip2location.com/images/tutorial/logstash-filter-ip2location-screenshot2.png)
-
-|Field|Description|
-|---|---|
-|ip2location.area_code|the varying length number assigned to geographic areas for call between cities|
-|ip2location.city|the city name|
-|ip2location.country_long|the country name based on ISO 3166|
-|ip2location.country_short|the two-character country code based on ISO 3166|
-|ip2location.domain|the Internet domain name associated to IP address range|
-|ip2location.elevation|the elevation|
-|ip2location.idd_code|the IDD prefix to call the city from another country|
-|ip2location.ip_address|the IP address|
-|ip2location.isp|the Internet Service Provider (ISP) name|
-|ip2location.latitude|the city latitude|
-|ip2location.longitude|the city longitude|
-|ip2location.mcc|the mobile country code|
-|ip2location.mnc|mobile network code|
-|ip2location.mobile_brand|the mobile brand|
-|ip2location.net_speed|the Internet Connection Speed (DIAL) DIAL-UP,(DSL) DSL/CABLE or(COMP) COMPANY|
-|ip2location.region|the region or state name|
-|ip2location.time_zone|the Time zone in UTC (Coordinated Universal Time)|
-|ip2location.usage_type|the usage type|
-|ip2location.weather_station_code|the special code to identify the nearest weather observation station|
-|ip2location.weather_station_name|the name of the nearest weather observation station|
-|ip2location.zip_code|the ZIP code|
-
-
 ## Dependencies (IP2LOCATION BIN DATA FILE)
 This plugin requires IP2Location BIN data file to function. You may download the BIN data file at
 * IP2Location LITE BIN Data (Free): https://lite.ip2location.com
@@ -81,6 +53,34 @@ output {
 
 * **source** field is a required setting that containing the IP address or hostname to get the ip information.
 * **database** field is an optional setting that containing the path to the IP2Location BIN database file.
+
+
+## Sample Output
+|Field|Description|
+|---|---|
+|ip2location.area_code|the varying length number assigned to geographic areas for call between cities|
+|ip2location.city|the city name|
+|ip2location.country_long|the country name based on ISO 3166|
+|ip2location.country_short|the two-character country code based on ISO 3166|
+|ip2location.domain|the Internet domain name associated to IP address range|
+|ip2location.elevation|the elevation|
+|ip2location.idd_code|the IDD prefix to call the city from another country|
+|ip2location.ip_address|the IP address|
+|ip2location.isp|the Internet Service Provider (ISP) name|
+|ip2location.latitude|the city latitude|
+|ip2location.longitude|the city longitude|
+|ip2location.mcc|the mobile country code|
+|ip2location.mnc|mobile network code|
+|ip2location.mobile_brand|the mobile brand|
+|ip2location.net_speed|the Internet Connection Speed (DIAL) DIAL-UP,(DSL) DSL/CABLE or(COMP) COMPANY|
+|ip2location.region|the region or state name|
+|ip2location.time_zone|the Time zone in UTC (Coordinated Universal Time)|
+|ip2location.usage_type|the usage type|
+|ip2location.weather_station_code|the special code to identify the nearest weather observation station|
+|ip2location.weather_station_name|the name of the nearest weather observation station|
+|ip2location.zip_code|the ZIP code|
+
+![Example of data](https://www.ip2location.com/images/tutorial/logstash-filter-ip2location-screenshot2.png?)
 
 
 ## Support
