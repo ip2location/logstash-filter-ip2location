@@ -22,7 +22,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
   # The field used to define iplocation as target.
   config :target, :validate => :string, :default => 'ip2location'
 
-  # The field used to define the size of the cache. It is not required and the default value is 10 000
+  # The field used to define the size of the cache. It is not required and the default value is 10 000 
   config :cache_size, :validate => :number, :required => false, :default => 10_000
 
   public
@@ -36,22 +36,22 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
     end
 
     @logger.info("Using ip2location database", :path => @database)
-
+    
     @ip2locationfilter = org.logstash.filters.IP2LocationFilter.new(@source, @target, @database)
   end
 
   public
   def filter(event)
-    return unless filter?(event)
+    json = JSON.parse(event.to_json)
+    ip = json["clientip"]
 
-    Cache.set(@cache_size) if @cache_size
-    if Cache.include?(event)
-      event.set('ip2location', Cache.for(event))
+    return unless filter?(event)
+    if value = Cache.find(event, ip, @ip2locationfilter, @cache_size).get('ip2location')
+      event.set('ip2location', value)
+      filter_matched(event)
     else
-      return tag_iplookup_unsuccessful(event) unless @ip2locationfilter.handleEvent(event)
-      Cache.cache(event)
-    end
-    filter_matched(event)
+      tag_iplookup_unsuccessful(event)
+    end    
   end
 
   def tag_iplookup_unsuccessful(event)
@@ -63,137 +63,97 @@ end # class LogStash::Filters::IP2Location
 class OrderedHash
   ONE = 1
 
-  attr_reader :hits_for # ip -> times queried
-  attr_reader :ips_for
+  attr_reader :times_queried # ip -> times queried
+  attr_reader :hash
 
   def initialize
-    @hits_for = Hash.new(0) # ip -> times queried
-    @ips_for = {} # number of hits -> ips that have been hit #{key} times
+    @times_queried = Hash.new(0) # ip -> times queried
+    @hash = {} # number of hits -> array of ips
   end
 
-  def register(ip)
-    ips_for[ONE] ||= []
-    ips_for[ONE] << ip
-    hits_for[ip] += 1
+  def add(key)
+    hash[ONE] ||= []
+    hash[ONE] << key
+    times_queried[key] = ONE
   end
 
-  # 1. remove ip from its current category
-  # 2. delete category if now empty
-  # 3. (create and) add to the new category
-  def reorder(ip)
-    category = hits_for[ip]
-    remove_ip_from(category, ip)
-    add_ip_to(category + 1, ip)
+  def reorder(key)
+    number_of_queries = times_queried[key]
+
+    hash[number_of_queries].delete(key)
+    hash.delete(number_of_queries) if hash[number_of_queries].empty?
+
+    hash[number_of_queries + 1] ||= []
+    hash[number_of_queries + 1] << key
   end
 
-  def remove_ip_from(category, ip)
-    ips_for[category].delete(ip)
-    ips_for.delete(category) if ips_for[category].empty?
-  end
-
-  def add_ip_to(category, ip)
-    ips_for[category] ||= []
-    ips_for[category] << ip
-  end
-
-  # 1. registers the ip if it's a first-timer
-  # 2. reorders the priority list
-  # 3. updates times_quried
-  def upvote(ip)
-    if hits_for.has_key?(ip)
-      hits_for[ip] += 1
-      reorder(ip)
-    else
-      register(ip)
-    end
+  def increment(key)
+    add(key) unless times_queried.has_key?(key)
+    reorder(key)
+    times_queried[key] += 1
   end
 
   def delete_least_used
-    hits_for.delete(lowest_ip)
+    first_pile_with_someting.shift.tap { |key| times_queried.delete(key) }
   end
 
-  def lowest_ip
-    lowest_category = ips_for.keys.min
-    lowest_ip = ips_for[lowest_category].shift
-    ips_for.delete(lowest_category) if ips_for[lowest_category].empty?
-    lowest_ip
+  def first_pile_with_someting
+    hash[hash.keys.min]
   end
 end
 
 class Cache
   ONE_DAY_IN_SECONDS = 86_400
 
-  @ip2loc_for    = {}              # ip -> ip2location_key
-  @timestamps    = {}              # ip -> time of caching
+  @cache         = {}            # ip -> event
+  @timestamps    = {}            # ip -> time of caching
   @times_queried = OrderedHash.new # ip -> times queried
   @mutex         = Mutex.new
 
   class << self
-    attr_reader :ip2loc_for
+    attr_reader :cache
     attr_reader :timestamps
     attr_reader :times_queried
-    attr_reader :cache_size
 
-    def set(cache_size)
-      @cache_size = cache_size
-    end
 
-    def include?(event)
-      ip = ip_from(event)
-      ip2loc_for.has_key?(ip) && up_to_date?(ip)
-    end
-
-    # Retrieve the `ip2location` tag for a given event
-    # 1. increment the counter on this event
-    # 2. return the `ip2location` tag
-    def for(event)
-      synchronize do
-        ip = ip_from(event)
-        times_queried.upvote(ip)
-        ip2loc_for[ip]
+    def find(event, ip, filter, cache_size)
+    synchronize do
+      if cache.has_key?(ip)
+        refresh_event(ip) if too_old?(ip)
+      else
+        if cache_full?(cache_size)
+          make_room 
+        end
+        cache_event(event, ip, filter)
       end
+      times_queried.increment(ip)
+      cache[ip]
+    end
     end
 
-    def cache(event)
-      synchronize do
-        make_room if cache_full?
-        cache_event(event)
-      end
-    end
-
-    private
-
-    def up_to_date?(ip)
+    def too_old?(ip)
       timestamps[ip] < Time.now - ONE_DAY_IN_SECONDS
     end
 
-    def cache_full?
-      ip2loc_for.size >= cache_size
-    end
-
     def make_room
-      least_used_ip = times_queried.delete_least_used
-      forget(least_used_ip)
+      key = times_queried.delete_least_used
+      cache.delete(key)
+      timestamps.delete(key)
+    end
+    def cache_full?(cache_size)
+      cache.size >= cache_size
     end
 
-    def forget(ip)
-      ip2loc_for.delete(ip)
-      timestamps.delete(ip)
-    end
-
-    def cache_event(event)
-      ip = ip_from(event)
-      ip2loc_for[ip] = event.get('ip2location')
+    def cache_event(event, ip, filter)
+      filter.handleEvent(event)
+      cache[ip] = event
       timestamps[ip] = Time.now
     end
-
+  
     def synchronize(&block)
       @mutex.synchronize(&block)
     end
-
-    def ip_from(event)
-      JSON.parse(event.to_json)['clientip']
-    end
+    
+    alias_method :refresh_event, :cache_event
   end
 end
-
