@@ -36,7 +36,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
     end
 
     @logger.info("Using ip2location database", :path => @database)
-    
+
     @ip2locationfilter = org.logstash.filters.IP2LocationFilter.new(@source, @target, @database)
   end
 
@@ -51,7 +51,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
       filter_matched(event)
     else
       tag_iplookup_unsuccessful(event)
-    end    
+    end
   end
 
   def tag_iplookup_unsuccessful(event)
@@ -117,18 +117,18 @@ class Cache
 
 
     def find(event, ip, filter, cache_size)
-    synchronize do
-      if cache.has_key?(ip)
-        refresh_event(ip) if too_old?(ip)
-      else
-        if cache_full?(cache_size)
-          make_room 
+      synchronize do
+        if cache.has_key?(ip)
+          refresh_event(ip) if too_old?(ip)
+        else
+          if cache_full?(cache_size)
+            make_room 
+          end
+          cache_event(event, ip, filter)
         end
-        cache_event(event, ip, filter)
+        times_queried.increment(ip)
+        cache[ip]
       end
-      times_queried.increment(ip)
-      cache[ip]
-    end
     end
 
     def too_old?(ip)
@@ -140,6 +140,7 @@ class Cache
       cache.delete(key)
       timestamps.delete(key)
     end
+
     def cache_full?(cache_size)
       cache.size >= cache_size
     end
@@ -149,11 +150,11 @@ class Cache
       cache[ip] = event
       timestamps[ip] = Time.now
     end
-  
+
     def synchronize(&block)
       @mutex.synchronize(&block)
     end
-    
+
     alias_method :refresh_event, :cache_event
   end
 end
