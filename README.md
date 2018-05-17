@@ -50,9 +50,11 @@ output {
 |---|---|---|
 |source|string|Yes|
 |database|a valid filesystem path|No|
+|use_memory_mapped|boolean|No|
 
 * **source** field is a required setting that containing the IP address or hostname to get the ip information.
 * **database** field is an optional setting that containing the path to the IP2Location BIN database file.
+* **use_memory_mapped** field is an optional setting that used to allow user to enable the use of memory mapped file. Default value is false.
 
 
 ## Sample Output
