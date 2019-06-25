@@ -19,7 +19,7 @@ bin/logstash-plugin install logstash-filter-ip2location
 ```
 
 
-## Config File Example
+## Config File Example 1
 ```
 input {
   beats {
@@ -33,6 +33,34 @@ filter {
   }
   ip2location {
     source => "clientip"
+  }
+}
+
+
+output {
+  elasticsearch {
+    hosts => [ "localhost:9200" ]
+  }
+}
+```
+
+
+## Config File Example 2
+```
+input {
+  beats {
+    port => "5043"
+  }
+}
+
+filter {
+  grok {
+    match => { "message" => "%{COMBINEDAPACHELOG}"}
+  }
+  ip2location {
+    source => "clientip"
+    database => "IP2LOCATION_BIN_DATABASE_FILESYSTEM_PATH"
+    use_memory_mapped => true
   }
 }
 
