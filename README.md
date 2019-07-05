@@ -59,7 +59,9 @@ filter {
   }
   ip2location {
     source => "clientip"
+    # Set path to the database located
     database => "IP2LOCATION_BIN_DATABASE_FILESYSTEM_PATH"
+    # Enable memory mapped to be used
     use_memory_mapped => true
   }
 }
