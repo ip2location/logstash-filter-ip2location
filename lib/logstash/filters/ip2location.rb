@@ -3,7 +3,6 @@ require "logstash/filters/base"
 require "logstash/namespace"
 
 require "logstash-filter-ip2location_jars"
-require "json"
 
 require 'thread'
 
@@ -45,8 +44,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
 
   public
   def filter(event)
-    json = JSON.parse(event.to_json)
-    ip = json[@source]
+    ip = event.get(@source)
 
     return unless filter?(event)
     if value = Cache.find(event, ip, @ip2locationfilter, @cache_size).get('ip2location')

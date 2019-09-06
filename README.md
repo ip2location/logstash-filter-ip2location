@@ -112,7 +112,7 @@ output {
 |ip2location.weather_station_name|the name of the nearest weather observation station|
 |ip2location.zip_code|the ZIP code|
 
-![Example of data](https://www.ip2location.com/images/tutorial/logstash-filter-ip2location-screenshot2.png?)
+![Example of data](https://www.ip2location.com/assets/img/logstash-filter-ip2location-screenshot2.png)
 
 
 ## Support
