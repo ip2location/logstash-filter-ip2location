@@ -2,7 +2,7 @@
 require_relative '../spec_helper'
 require "logstash/filters/ip2location"
 
-IP2LOCATIONDB = ::Dir.glob(::File.expand_path("../../vendor/", ::File.dirname(__FILE__))+"/IP2LOCATION-LITE-DB3.IPV6.BIN").first
+IP2LOCATIONDB = ::Dir.glob(::File.expand_path("../../vendor/", ::File.dirname(__FILE__))+"/IP2LOCATION-LITE-DB1.IPV6.BIN").first
 
 describe LogStash::Filters::IP2Location do
 

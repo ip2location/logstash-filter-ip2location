@@ -1,3 +1,3 @@
 require 'jar_dependencies'
-require_jar('com.ip2location.ip2location', 'ip2location', '8.1.0')
-require_jar('org.logstash.filters', 'logstash-filter-ip2location', '2.1.0')
+require_jar('com.ip2location.ip2location', 'ip2location', '8.2.0')
+require_jar('org.logstash.filters', 'logstash-filter-ip2location', '2.1.1')

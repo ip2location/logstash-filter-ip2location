@@ -11,7 +11,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
   config_name "ip2location"
 
   # The path to the IP2Location.BIN database file which Logstash should use.
-  # If not specified, this will default to the IP2LOCATION-LITE-DB3.IPV6.BIN database that embedded in the plugin.
+  # If not specified, this will default to the IP2LOCATION-LITE-DB1.IPV6.BIN database that embedded in the plugin.
   config :database, :validate => :path
 
   # The field containing the IP address.
@@ -30,7 +30,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
   public
   def register
     if @database.nil?
-      @database = ::Dir.glob(::File.join(::File.expand_path("../../../vendor/", ::File.dirname(__FILE__)),"IP2LOCATION-LITE-DB3.IPV6.BIN")).first
+      @database = ::Dir.glob(::File.join(::File.expand_path("../../../vendor/", ::File.dirname(__FILE__)),"IP2LOCATION-LITE-DB1.IPV6.BIN")).first
 
       if @database.nil? || !File.exists?(@database)
         raise "You must specify 'database => ...' in your ip2location filter (I looked for '#{@database}')"
@@ -120,7 +120,7 @@ class Cache
     def find(event, ip, filter, cache_size)
       synchronize do
         if cache.has_key?(ip)
-          refresh_event(ip) if too_old?(ip)
+          refresh_event(event, ip, filter) if too_old?(ip)
         else
           if cache_full?(cache_size)
             make_room 
