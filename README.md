@@ -100,6 +100,7 @@ output {
 |ip2location.ip_address|the IP address|
 |ip2location.isp|the Internet Service Provider (ISP) name|
 |ip2location.latitude|the city latitude|
+|ip2location.location|the city location|
 |ip2location.longitude|the city longitude|
 |ip2location.mcc|the mobile country code|
 |ip2location.mnc|mobile network code|
