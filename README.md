@@ -81,10 +81,14 @@ output {
 |source|string|Yes|
 |database|a valid filesystem path|No|
 |use_memory_mapped|boolean|No|
+|use_cache|boolean|No|
+|hide_unsupported_fields|boolean|No|
 
 * **source** field is a required setting that containing the IP address or hostname to get the ip information.
 * **database** field is an optional setting that containing the path to the IP2Location BIN database file.
 * **use_memory_mapped** field is an optional setting that used to allow user to enable the use of memory mapped file. Default value is false.
+* **use_cache** field is an optional setting that used to allow user to enable the use of cache. Default value is true.
+* **hide_unsupported_fields** field is an optional setting that used to allow user to hide unsupported fields. Default value is false.
 
 
 ## Sample Output

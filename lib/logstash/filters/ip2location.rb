@@ -21,8 +21,14 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
   # The field used to define iplocation as target.
   config :target, :validate => :string, :default => 'ip2location'
 
+  # The field used to allow user to enable the use of cache.
+  config :use_cache, :validate => :boolean, :default => true
+
   # The field used to allow user to enable the use of memory mapped file.
   config :use_memory_mapped, :validate => :boolean, :default => false
+
+  # The field used to allow user to hide unsupported fields.
+  config :hide_unsupported_fields, :validate => :boolean, :default => false
 
   # The field used to define the size of the cache. It is not required and the default value is 10 000 
   config :cache_size, :validate => :number, :required => false, :default => 10_000
@@ -39,7 +45,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
 
     @logger.info("Using ip2location database", :path => @database)
 
-    @ip2locationfilter = org.logstash.filters.IP2LocationFilter.new(@source, @target, @database, @use_memory_mapped)
+    @ip2locationfilter = org.logstash.filters.IP2LocationFilter.new(@source, @target, @database, @use_memory_mapped, @hide_unsupported_fields)
   end
 
   public
@@ -47,11 +53,19 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
     ip = event.get(@source)
 
     return unless filter?(event)
-    if value = Cache.find(event, ip, @ip2locationfilter, @cache_size).get('ip2location')
-      event.set('ip2location', value)
-      filter_matched(event)
+    if @use_cache
+      if value = Cache.find(event, ip, @ip2locationfilter, @cache_size).get('ip2location')
+        event.set('ip2location', value)
+        filter_matched(event)
+      else
+        tag_iplookup_unsuccessful(event)
+      end
     else
-      tag_iplookup_unsuccessful(event)
+      if @ip2locationfilter.handleEvent(event)
+        filter_matched(event)
+      else
+        tag_iplookup_unsuccessful(event)
+      end
     end
   end
 
