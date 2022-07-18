@@ -5,6 +5,8 @@ Supported IPv4 and IPv6 address.
 
 For the methods to use IP2Location filter plugin with Elastic Stack (Elasticsearch, Filebeat, Logstash, and Kibana), please take a look on this [tutorial](https://www.ip2location.com/tutorials/how-to-use-ip2location-filter-plugin-with-elastic-stack).
 
+*Note: This plugin works in Logstash 7 and Logstash 8.*
+
 
 ## Dependencies (IP2LOCATION BIN DATA FILE)
 This plugin requires IP2Location BIN data file to function. You may download the BIN data file at
