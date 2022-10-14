@@ -54,7 +54,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
 
     return unless filter?(event)
     if @use_cache
-      if value = Cache.find(event, ip, @ip2locationfilter, @cache_size).get('ip2location')
+      if value = IP2LocationCache.find(event, ip, @ip2locationfilter, @cache_size).get('ip2location')
         event.set('ip2location', value)
         filter_matched(event)
       else
@@ -75,7 +75,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
 
 end # class LogStash::Filters::IP2Location
 
-class OrderedHash
+class IP2LocationOrderedHash
   ONE = 1
 
   attr_reader :times_queried # ip -> times queried
@@ -117,12 +117,12 @@ class OrderedHash
   end
 end
 
-class Cache
+class IP2LocationCache
   ONE_DAY_IN_SECONDS = 86_400
 
   @cache         = {}            # ip -> event
   @timestamps    = {}            # ip -> time of caching
-  @times_queried = OrderedHash.new # ip -> times queried
+  @times_queried = IP2LocationOrderedHash.new # ip -> times queried
   @mutex         = Mutex.new
 
   class << self
@@ -137,7 +137,7 @@ class Cache
           refresh_event(event, ip, filter) if too_old?(ip)
         else
           if cache_full?(cache_size)
-            make_room 
+            make_room
           end
           cache_event(event, ip, filter)
         end
