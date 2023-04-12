@@ -1,5 +1,5 @@
 # IP2Location Filter Plugin
-This is IP2Location filter plugin for Logstash that enables Logstash's users to add geolocation information such as country, region, city, latitude, longitude, ZIP code, time zone, Internet Service Provider (ISP), domain name, connection speed, IDD code, area code, weather station code, weather station name, mobile country code (MCC), mobile network code (MNC), mobile brand, elevation, usage type, address type and category by IP address. The library reads the geo location information from **IP2Location BIN data** file.
+This is IP2Location filter plugin for Logstash that enables Logstash's users to add geolocation information such as country, region, district, city, latitude, longitude, ZIP code, time zone, Internet Service Provider (ISP), domain name, connection speed, IDD code, area code, weather station code, weather station name, mobile country code (MCC), mobile network code (MNC), mobile brand, elevation, usage type, address type, IAB category and ASN by IP address. The library reads the geo location information from **IP2Location BIN data** file.
 
 Supported IPv4 and IPv6 address.
 
@@ -34,7 +34,7 @@ filter {
     match => { "message" => "%{COMBINEDAPACHELOG}"}
   }
   ip2location {
-    source => "clientip"
+    source => "[source][address]"
   }
 }
 
@@ -60,7 +60,7 @@ filter {
     match => { "message" => "%{COMBINEDAPACHELOG}"}
   }
   ip2location {
-    source => "clientip"
+    source => "[source][address]"
     # Set path to the database located
     database => "IP2LOCATION_BIN_DATABASE_FILESYSTEM_PATH"
     # Enable memory mapped to be used
@@ -98,10 +98,13 @@ output {
 |---|---|
 |ip2location.address_type|the IP address type (A-Anycast, B-Broadcast, M-Multicast & U-Unicast) of IP address or domain name|
 |ip2location.area_code|the varying length number assigned to geographic areas for call between cities|
+|ip2location.as|Autonomous system (AS) name|
+|ip2location.asn|the Autonomous system number (ASN)|
 |ip2location.category|the IAB content taxonomy category of IP address or domain name|
 |ip2location.city|the city name|
 |ip2location.country_long|the country name based on ISO 3166|
 |ip2location.country_short|the two-character country code based on ISO 3166|
+|ip2location.district|the district or county name|
 |ip2location.domain|the Internet domain name associated to IP address range|
 |ip2location.elevation|the elevation|
 |ip2location.idd_code|the IDD prefix to call the city from another country|
@@ -123,6 +126,5 @@ output {
 
 
 ## Support
-Email: support@ip2location.com
-
+Email: support@ip2location.com  
 URL: [https://www.ip2location.com](https://www.ip2location.com)
