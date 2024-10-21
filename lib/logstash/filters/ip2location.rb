@@ -18,7 +18,7 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
   # If this field is an array, only the first value will be used.
   config :source, :validate => :string, :required => true
 
-  # The field used to define iplocation as target.
+  # The field used to define ip2location as target.
   config :target, :validate => :string, :default => 'ip2location'
 
   # The field used to allow user to enable the use of cache.
@@ -30,22 +30,34 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
   # The field used to allow user to hide unsupported fields.
   config :hide_unsupported_fields, :validate => :boolean, :default => false
 
+  # The field used to define lookup type.
+  config :lookup_type, :validate => :string, :default => 'db'
+
+  # The field used to define the apikey of IP2location.io.
+  config :api_key, :validate => :string, :default => ''
+
   # The field used to define the size of the cache. It is not required and the default value is 10 000 
   config :cache_size, :validate => :number, :required => false, :default => 10_000
 
   public
   def register
-    if @database.nil?
-      @database = ::Dir.glob(::File.join(::File.expand_path("../../../vendor/", ::File.dirname(__FILE__)),"IP2LOCATION-LITE-DB1.IPV6.BIN")).first
-
-      if @database.nil? || !File.exists?(@database)
-        raise "You must specify 'database => ...' in your ip2location filter (I looked for '#{@database}')"
+    if @lookup_type == "ws"
+      @logger.info("Using IP2Location.io API")
+      if @api_key == ""
+        raise "An IP2Location.io API key is required. You may sign up for a free API key at https://www.ip2location.io/pricing."
       end
+    else
+      if @database.nil?
+        @database = ::Dir.glob(::File.join(::File.expand_path("../../../vendor/", ::File.dirname(__FILE__)),"IP2LOCATION-LITE-DB1.IPV6.BIN")).first
+  
+        if @database.nil? || !File.exists?(@database)
+          raise "You must specify 'database => ...' in your ip2location filter (I looked for '#{@database}')"
+        end
+      end
+      @logger.info("Using ip2location database", :path => @database)
     end
 
-    @logger.info("Using ip2location database", :path => @database)
-
-    @ip2locationfilter = org.logstash.filters.IP2LocationFilter.new(@source, @target, @database, @use_memory_mapped, @hide_unsupported_fields)
+    @ip2locationfilter = org.logstash.filters.IP2LocationFilter.new(@source, @target, @database, @use_memory_mapped, @hide_unsupported_fields, @lookup_type, @api_key)
   end
 
   public
@@ -53,18 +65,26 @@ class LogStash::Filters::IP2Location < LogStash::Filters::Base
     ip = event.get(@source)
 
     return unless filter?(event)
-    if @use_cache
-      if value = IP2LocationCache.find(event, ip, @ip2locationfilter, @cache_size).get('ip2location')
-        event.set('ip2location', value)
+    if @lookup_type == "ws"
+      if @ip2locationfilter.handleEvent(event)
         filter_matched(event)
       else
         tag_iplookup_unsuccessful(event)
       end
     else
-      if @ip2locationfilter.handleEvent(event)
-        filter_matched(event)
+      if @use_cache
+        if value = IP2LocationCache.find(event, ip, @ip2locationfilter, @cache_size).get('ip2location')
+          event.set('ip2location', value)
+          filter_matched(event)
+        else
+          tag_iplookup_unsuccessful(event)
+        end
       else
-        tag_iplookup_unsuccessful(event)
+        if @ip2locationfilter.handleEvent(event)
+          filter_matched(event)
+        else
+          tag_iplookup_unsuccessful(event)
+        end
       end
     end
   end

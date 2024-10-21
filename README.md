@@ -1,5 +1,5 @@
 # IP2Location Filter Plugin
-This is IP2Location filter plugin for Logstash that enables Logstash's users to add geolocation information such as country, region, district, city, latitude, longitude, ZIP code, time zone, Internet Service Provider (ISP), domain name, connection speed, IDD code, area code, weather station code, weather station name, mobile country code (MCC), mobile network code (MNC), mobile brand, elevation, usage type, address type, IAB category and ASN by IP address. The library reads the geo location information from **IP2Location BIN data** file.
+This is IP2Location filter plugin for Logstash that enables Logstash's users to add geolocation information such as country, region, district, city, latitude, longitude, ZIP code, time zone, Internet Service Provider (ISP), domain name, connection speed, IDD code, area code, weather station code, weather station name, mobile country code (MCC), mobile network code (MNC), mobile brand, elevation, usage type, address type, IAB category and ASN by IP address. The library reads the geolocation information from **IP2Location BIN data** file and **IP2Location.io** data.
 
 Supported IPv4 and IPv6 address.
 
@@ -12,6 +12,9 @@ For the methods to use IP2Location filter plugin with Elastic Stack (Elasticsear
 This plugin requires IP2Location BIN data file to function. You may download the BIN data file at
 * IP2Location LITE BIN Data (Free): https://lite.ip2location.com
 * IP2Location Commercial BIN Data (Commercial): https://www.ip2location.com
+
+## Dependencies (IP2LOCATION.IO DATA)
+This plugin requires API key to function. You may sign up for a free API key at https://www.ip2location.io/pricing.
 
 
 ## Installation
@@ -38,14 +41,12 @@ filter {
   }
 }
 
-
 output {
   elasticsearch {
     hosts => [ "localhost:9200" ]
   }
 }
 ```
-
 
 ## Config File Example 2
 ```
@@ -68,6 +69,32 @@ filter {
   }
 }
 
+output {
+  elasticsearch {
+    hosts => [ "localhost:9200" ]
+  }
+}
+```
+
+## Config File Example 3 using IP2Location.io
+```
+input {
+  beats {
+    port => "5043"
+  }
+}
+
+filter {
+  grok {
+    match => { "message" => "%{COMBINEDAPACHELOG}"}
+  }
+  ip2location {
+    source => "[source][address]"
+    lookup_type => "ws"
+    api_key => "YOUR_API_KEY"
+  }
+}
+
 
 output {
   elasticsearch {
@@ -84,12 +111,16 @@ output {
 |database|a valid filesystem path|No|
 |use_memory_mapped|boolean|No|
 |use_cache|boolean|No|
+|lookup_type|string|No|
+|api_key|string|No|
 |hide_unsupported_fields|boolean|No|
 
 * **source** field is a required setting that containing the IP address or hostname to get the ip information.
 * **database** field is an optional setting that containing the path to the IP2Location BIN database file.
 * **use_memory_mapped** field is an optional setting that used to allow user to enable the use of memory mapped file. Default value is false.
 * **use_cache** field is an optional setting that used to allow user to enable the use of cache. Default value is true.
+* **lookup_type** field is an optional setting that used to allow user to decide the lookup method either using IP2Location BIN database file(db) or IP2Location.io data(ws). Default value is db.
+* **api_key** field is an optional setting that used to allow user to set the API Key of the IP2Location.io lookup.
 * **hide_unsupported_fields** field is an optional setting that used to allow user to hide unsupported fields. Default value is false.
 
 
