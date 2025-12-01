@@ -1,11 +1,11 @@
 # IP2Location Filter Plugin
-This is IP2Location filter plugin for Logstash that enables Logstash's users to add geolocation information such as country, region, district, city, latitude, longitude, ZIP code, time zone, Internet Service Provider (ISP), domain name, connection speed, IDD code, area code, weather station code, weather station name, mobile country code (MCC), mobile network code (MNC), mobile brand, elevation, usage type, address type, IAB category and ASN by IP address. The library reads the geolocation information from **IP2Location BIN data** file and **IP2Location.io** data.
+This is IP2Location filter plugin for Logstash that enables Logstash's users to add geolocation information such as country, region, district, city, latitude, longitude, ZIP code, time zone, Internet Service Provider (ISP), domain name, connection speed, IDD code, area code, weather station code, weather station name, mobile country code (MCC), mobile network code (MNC), mobile brand, elevation, usage type, address type, IAB category, ASN, AS domain, AS usage type and AS CIDR by IP address. The library reads the geolocation information from **IP2Location BIN data** file and **IP2Location.io** data.
 
 Supported IPv4 and IPv6 address.
 
 For the methods to use IP2Location filter plugin with Elastic Stack (Elasticsearch, Filebeat, Logstash, and Kibana), please take a look on this [tutorial](https://www.ip2location.com/tutorials/how-to-use-ip2location-filter-plugin-with-elastic-stack).
 
-*Note: This plugin works in Logstash 7 and Logstash 8.*
+*Note: This plugin works in Logstash 7, 8 and 9.*
 
 
 ## Dependencies (IP2LOCATION BIN DATA FILE)
@@ -131,6 +131,9 @@ output {
 |ip2location.area_code|the varying length number assigned to geographic areas for call between cities|
 |ip2location.as|Autonomous system (AS) name|
 |ip2location.asn|the Autonomous system number (ASN)|
+|ip2location.as_cidr|CIDR range for the whole AS|
+|ip2location.as_domain|Domain name of the AS registrant|
+|ip2location.as_usage_type|Usage type of the AS registrant|
 |ip2location.category|the IAB content taxonomy category of IP address or domain name|
 |ip2location.city|the city name|
 |ip2location.country_long|the country name based on ISO 3166|
